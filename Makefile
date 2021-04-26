@@ -19,17 +19,24 @@ SRCDIR           = ./src/
 CXX	         += -I$(INCLUDEDIR) -I.
 OUTOBJ	         = ./obj/
 OUTOBJ_CMSSW	 = ./obj_cmssw/
+OUTOBJ_JME       = ./obj_jme/
 
 INCLUDEDIR_CMSSW  = ./include_cmssw/
 SRCDIR_CMSSW      = ./src_cmssw/
 
+INCLUDEDIR_JME  = ./include_jme/
+SRCDIR_JME      = ./src_jme/
+
 cmssw: CXX += -I$(INCLUDEDIR_CMSSW)
+
+jme: CXX += -I$(INCLUDEDIR_CMSSW)
 
 CC_FILES := $(wildcard src/*.cc)
 HH_FILES := $(wildcard include/*.hh)
 
 CC_FILES_CMSSW := $(wildcard src_cmssw/*.cc)
 cmssw: HH_FILES += $(wildcard include_cmssw/*.hh)
+jme: HH_FILES += $(wildcard include_jme/*.hh)
 
 OBJ_FILES := $(addprefix $(OUTOBJ),$(notdir $(CC_FILES:.cc=.o)))
 OBJ_FILES_CMSSW := $(addprefix $(OUTOBJ_CMSSW),$(notdir $(CC_FILES_CMSSW:.cc=.o)))
@@ -43,11 +50,14 @@ local : GLIBS += -L/Users/christopherrogan/GitHub/lwtnn/lib -llwtnn
 local : CXX += -I/Users/christopherrogan/GitHub/lwtnn/include
 
 cmssw : GLIBS += -L../../lib/slc7_amd64_gcc700 -lCombineHarvesterCombinePdfs -lHiggsAnalysisCombinedLimit -lCombineHarvesterCombineTools
-cmssw : GLIBS += -L/cvmfs/cms.cern.ch/slc7_amd64_gcc700/external/lwtnn/2.4-gnimlf3/lib -llwtnn
+jme : GLIBS += -L../../lib/slc7_amd64_gcc820 -llibCondFormatsJetMETObjects 
+jme : GLIBS += -L/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_5/external/slc7_amd64_gcc700/lib/ -lvdt -lboost_program_options -lboost_filesystem -lboost_regex -lboost_system
+#jme : GLIBS += -L/cvmfs/cms.cern.ch/slc7_amd64_gcc700/external/boost/1.63.0-gnimlf/lib/libboost_serialization.so
+jme : GLIBS += -L/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/lwtnn/2.4-ikaegh3/lib -llwtnn
 cmssw : GLIBS += -L/cvmfs/cms.cern.ch/slc7_amd64_gcc700/cms/cmssw/CMSSW_10_6_5/external/slc7_amd64_gcc700/lib/ -lvdt -lboost_program_options -lboost_filesystem -lboost_regex -lboost_system
 
-cmssw : CXX   += -I../. -I/cvmfs/cms.cern.ch/slc7_amd64_gcc700/external/boost/1.67.0/include/
-cmssw : CXX   += -I/cvmfs/cms.cern.ch/slc7_amd64_gcc700/external/lwtnn/2.4-gnimlf3/include/
+jme : CXX   += -I../. -I/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.67.0/include/
+jme : CXX   += -I/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/lwtnn/2.4-ikaegh3/include/
 cmssw : CXX   += -I../../src/HiggsAnalysis/CombinedLimit/interface/
 
 locallib : GLIBS += -L/Users/christopherrogan/GitHub/lwtnn/lib -llwtnn
@@ -57,11 +67,13 @@ all: alltargets lib
 
 cmssw: alltargets lib BuildFit.x
 
+jme: alltargets lib
+
 local: alltargets lib
 
 locallib: lib
 
-lib: lib/libKUEWKino.so
+lib: lib/libKUEWKino.so 
 
 alltargets: MakeReducedNtuple_NANO.x MakeEventCount_NANO.x BuildFitInput.x BuildFitInputCondor.x BuildFitCondor.x
 
@@ -102,10 +114,14 @@ lib/libKUEWKino.so: $(SOBJ_FILES)
 	$(CXX) -shared -o lib/libKUEWKino.so $(OUTOBJ)/*.o $(GLIBS)
 	touch lib/libKUEWKino.so
 
+
 $(OUTOBJ)%.o: src/%.cc include/%.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OUTOBJ_CMSSW)%.o: src_cmssw/%.cc include_cmssw/%.hh
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OUTOBJ_CMSSW)%.o: src_jme/%.cc include_jme/%.hh
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
