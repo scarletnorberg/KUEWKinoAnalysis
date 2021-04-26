@@ -50,4 +50,17 @@ at this point you will need to have set the **RestFrames**
 environmental varables set, i.e. have done* `source setup_RestFrames.sh`)
 
 	>$ cd KUEWKinoAnalysis
-	>$ make cmssw
+	>$ make CMSS
+Install Instructions
+   cmsrel CMSSW_10_6_5 
+   git-cms-addpkg CondFormats/JetMETObjects/
+   git clone https://github.com/crogan/KUEWKinoAnalysis.git
+   scram b -j
+   scp snorberg@t3.unl.edu:/home/t3-ku/crogan/RestFrames_vNew.tar .
+   tar -xvf RestFrames_vNew.tar
+   ./configure --prefix=$PWD 
+   make
+   make install
+   Go back to KU and do make
+Everytime you long in
+   source setup_up.sh in the RestFrames area
