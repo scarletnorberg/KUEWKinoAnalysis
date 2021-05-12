@@ -1,5 +1,8 @@
 #include "../include/JMETool.hh"
 
+#include "include_jme/FactorizedJetCorrector.h"
+#include "include_jme/JetCorrectorParameters.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -44,6 +47,23 @@ void JMETool::BuildMap(const std::string& JMEfolder){
 
   string post = "AK4PFchs.txt";
 
+   /*
+   jmrValues = {
+      '2016': [1.0, 1.2, 0.8],
+      '2017': [1.09, 1.14, 1.04],
+      # Use 2017 values for 2018 until 2018 are released
+      '2018': [1.09, 1.14, 1.04],
+      'UL2017': [1.00, 1.00, 1.00],  # placeholder
+        }
+   jmsValues = {
+      '2016': [1.00, 0.9906, 1.0094],  # nominal, down, up
+      '2017': [0.982, 0.978, 0.986],
+      # Use 2017 values for 2018 until 2018 are released
+      '2018': [0.982, 0.978, 0.986],
+      'UL2017': [1.000, 1.000, 1.000],  # placeholder
+                 }
+     */
+
   cout << "Building JME maps for all three years" << endl;
   
   for(int y = 0; y < 3; y++){
@@ -59,12 +79,136 @@ void JMETool::BuildMap(const std::string& JMEfolder){
     //cout << "...Done" << endl;
   }
 }
-
+//Reapply jec: https://github.com/cms-jet/JetMETAnalysis/blob/master/JetAnalyzers/bin/jet_apply_jec_x.cc
+//https://cms-nanoaod-integration.web.cern.ch/integration/master-cmsswmaster/mc102X_doc.html varaibles
+//https://github.com/cms-nanoAOD/nanoAOD-tools/blob/master/python/postprocessing/modules/jme/jetmetUncertainties.py uncertainties 
+//notneeded
+//https://github.com/cms-nanoAOD/nanoAOD-tools/blob/master/python/postprocessing/modules/jme/fatJetUncertainties.py
 void JMETool::ParseJESUncertainty(const string& input, int year, const string& prefix){
   if(year < 2016 || year > 2018)
     return;
-  
-  std::ifstream ifile(input.c_str());
+  //double jet_rawpt, jet_rawmass;
+  //int Njet = jetsLVec->size();
+  //for(jn>0, jn<=Njet, jn++){
+  //jet_rawpt = jetsLVec.pt(jn) * (1 - jet.rawFactor);
+  //jet_rawmass = jet.mass * (1 - jet.rawFactor);
+  //}
+  // corrector = new FactorizedJetCorrector(JetInfo::get_correction_levels(levels,L1FastJet),
+  //                                        JetInfo::get_correction_tags(era,alg,levels,jecpath,L1FastJet));
+  /*
+  for(unsigned int ilevel=0; ilevel<levels.size(); ilevel++)
+  {
+  vPar.push_back(JetCorrectorParameters(string(jecpath + era + 
+                                        JetInfo::get_level_tag(levels[ilevel],L1FastJet) + 
+                                        jetInfo.getAlias() + 
+                                        getPostfix(postfix,alg,levels[ilevel]) + ".txt")));
+                                        }
+                                        corrector = new FactorizedJetCorrector(vPar);
+          */
+  /*
+  corrector->setJetPt(JRAEvt->jtpt->at(ijt));
+  corrector->setJetEta(JRAEvt->jteta->at(ijt));
+  corrector->setRho(JRAEvt->rho);
+  JRAEvt->jtpt->at(ijt)*=jec;
+  JRAEvt->jte->at(ijt) *=jec;
+  */
+/*
+            # Get the JEC factors
+            jec = jet_pt / jet_rawpt
+            jecL1 = jet_pt_l1 / jet_rawpt
+*/
+ /*
+        for jesUncertainty in self.jesUncertainties:
+            jets_pt_jesUp[jesUncertainty] = []
+            jets_pt_jesDown[jesUncertainty] = []
+            jets_mass_jesUp[jesUncertainty] = []
+            jets_mass_jesDown[jesUncertainty] = []
+
+        if 'T1' in self.saveMETUncs:
+            (met_T1_px_jerUp, met_T1_px_jerDown, met_T1_py_jerUp,
+             met_T1_py_jerDown) = ({}, {}, {}, {})
+        if 'T1Smear' in self.saveMETUncs:
+            (met_T1Smear_px_jerUp, met_T1Smear_px_jerDown,
+             met_T1Smear_py_jerUp, met_T1Smear_py_jerDown) = ({}, {}, {}, {})
+        for jerID in self.splitJERIDs:
+            if 'T1' in self.saveMETUncs:
+                (met_T1_px_jerUp[jerID], met_T1_py_jerUp[jerID]) = (met_px,
+                                                                    met_py)
+                (met_T1_px_jerDown[jerID], met_T1_py_jerDown[jerID]) = (met_px,
+                                                                        met_py)
+            if 'T1Smear' in self.saveMETUncs:
+                (met_T1Smear_px_jerUp[jerID],
+                 met_T1Smear_py_jerUp[jerID]) = (met_px, met_py)
+                (met_T1Smear_px_jerDown[jerID],
+                 met_T1Smear_py_jerDown[jerID]) = (met_px, met_py)
+
+        if 'T1' in self.saveMETUncs:
+            (met_T1_px_jesUp, met_T1_py_jesUp) = ({}, {})
+            (met_T1_px_jesDown, met_T1_py_jesDown) = ({}, {})
+            for jesUncertainty in self.jesUncertainties:
+                met_T1_px_jesUp[jesUncertainty] = met_px
+                met_T1_py_jesUp[jesUncertainty] = met_py
+                met_T1_px_jesDown[jesUncertainty] = met_px
+                met_T1_py_jesDown[jesUncertainty] = met_py
+        if 'T1Smear' in self.saveMETUncs:
+            (met_T1Smear_px_jesUp, met_T1Smear_py_jesUp) = ({}, {})
+            (met_T1Smear_px_jesDown, met_T1Smear_py_jesDown) = ({}, {})
+            for jesUncertainty in self.jesUncertainties:
+                met_T1Smear_px_jesUp[jesUncertainty] = met_px
+                met_T1Smear_py_jesUp[jesUncertainty] = met_py
+                met_T1Smear_px_jesDown[jesUncertainty] = met_px
+                met_T1Smear_py_jesDown[jesUncertainty] = met_py
+
+        # variables needed for re-applying JECs to 2017 v2 MET
+        delta_x_T1Jet, delta_y_T1Jet = 0, 0
+        delta_x_rawJet, delta_y_rawJet = 0, 0
+for jesUncertainty in self.jesUncertainties:
+                    # cf. https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookJetEnergyCorrections#JetCorUncertainties
+                    # cf. https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
+                    if jesUncertainty == "HEMIssue":
+                        delta = 1.
+                        if iJet < nJet and jet_pt_nom > 15 and jet.jetId & 2 and jet.phi > -1.57 and jet.phi < -0.87:
+                            if jet.eta > -2.5 and jet.eta < -1.3:
+                                delta = 0.8
+                            elif jet.eta <= -2.5 and jet.eta > -3:
+                                delta = 0.65
+                        jet_pt_jesUp[jesUncertainty] = jet_pt_nom
+                        jet_pt_jesDown[jesUncertainty] = delta * jet_pt_nom
+                        jet_mass_jesUp[jesUncertainty] = jet_mass_nom
+                        jet_mass_jesDown[jesUncertainty] = delta * jet_mass_nom
+
+                        jet_pt_jesUpT1[jesUncertainty] = jet_pt_L1L2L3
+                        jet_pt_jesDownT1[jesUncertainty] = delta * \
+                            jet_pt_L1L2L3
+
+                    else:
+                        self.jesUncertainty[jesUncertainty].setJetPt(
+                            jet_pt_nom)
+                        self.jesUncertainty[jesUncertainty].setJetEta(jet.eta)
+                        delta = self.jesUncertainty[
+                            jesUncertainty].getUncertainty(True)
+                        jet_pt_jesUp[jesUncertainty] = jet_pt_nom * \
+                            (1. + delta)
+                        jet_pt_jesDown[jesUncertainty] = jet_pt_nom * \
+                            (1. - delta)
+                        jet_mass_jesUp[jesUncertainty] = jet_mass_nom * \
+                            (1. + delta)
+                        jet_mass_jesDown[jesUncertainty] = jet_mass_nom * \
+                            (1. - delta)
+
+                        # redo JES variations for T1 MET
+                        self.jesUncertainty[jesUncertainty].setJetPt(
+                            jet_pt_L1L2L3)
+                        self.jesUncertainty[jesUncertainty].setJetEta(jet.eta)
+                        delta = self.jesUncertainty[
+                            jesUncertainty].getUncertainty(True)
+                        jet_pt_jesUpT1[jesUncertainty] = jet_pt_L1L2L3 * \
+                            (1. + delta)
+                        jet_pt_jesDownT1[jesUncertainty] = jet_pt_L1L2L3 * \
+                            (1. - delta)
+
+*/
+                 
    if(!ifile.is_open()){
     std::cout << "can't open JME file " << input << std::endl;
     return;
@@ -200,6 +344,8 @@ void JMETool::ParseJEC(const string& input, int year, const string& prefix){
        }
      }
    }
+
+
 
    if(formula.find("%%%") != string::npos)
        formula.replace(formula.find("%%%"), 3, "max");
